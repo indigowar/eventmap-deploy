@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:14
+    ports:
+      - '5432:5432'
+    restart: always
+    volumes:
+      - database_data:/var/lib/postgresql/data/
+    networks:
+      - back
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+      - POSTGRES_DB=eventmap
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    ports:
+      - '8000:10000'
+    restart: always
+    depends_on:
+      - db
+    networks:
+      - front
+      - back
+    environment:
+      - POSTGRES_DB_NAME=eventmap
+      - POSTGRES_DB_USER=user
+      - POSTGRES_DB_PASSWORD=password
+      - POSTGRES_DB_HOST=db
+      - POSTGRES_DB_PORT=5432
+      - SECRET=secret
+      - ENV=dev
+      - HOST=127.0.0.1
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    ports:
+      - '8080:3000'
+    depends_on:
+      - backend
+    restart: always
+    environment:
+      - NEXT_APP_URL=127.0.0.1:3000
+      - NET_APP_SERVER_URL=backend
+      - NET_APP_ENV=development
+
+networks:
+  front:
+    driver: bridge
+  back:
+    driver: bridge
+
+volumes:
+  database_data:
