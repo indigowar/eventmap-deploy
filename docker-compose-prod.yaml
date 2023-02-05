@@ -29,11 +29,6 @@ services:
     depends_on:
       - backend
     restart: always
-    environment:
-      - NEXT_APP_URL=127.0.0.1:3000
-      - NET_APP_SERVER_URL=backend
-      - NET_APP_ENV=development
-
 networks:
   front:
     driver: bridge
